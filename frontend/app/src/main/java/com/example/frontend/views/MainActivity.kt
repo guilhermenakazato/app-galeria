@@ -1,31 +1,46 @@
-package com.example.frontend.view
+package com.example.frontend.views
 
 import android.Manifest
-import android.content.ContentResolver
 import android.content.ContentUris
-import android.content.Context
-import android.database.Cursor
 import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
 import android.widget.TextView
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.navigateUp
+import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.navigation.ui.setupWithNavController
 import com.example.frontend.R
 import com.example.frontend.model.Image
 import com.example.frontend.model.Video
 import com.example.frontend.utils.isPermissionGranted
 import com.example.frontend.utils.requestPermission
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var navController: NavController
+    private lateinit var appBarConfiguration: AppBarConfiguration
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        var mediaQuantityText: TextView = findViewById(R.id.mediaQuantityText)
+        //var mediaQuantityText: TextView = findViewById(R.id.mediaQuantityText)
         checkPermissions()
         var mediaQuantity = getVideosQuantity() + getImagesQuantity()
-        mediaQuantityText.text = mediaQuantity.toString()
+        //mediaQuantityText.text = mediaQuantity.toString()
+
+        val navHostFragment = supportFragmentManager.findFragmentById(
+            R.id.nav_container
+        ) as NavHostFragment
+        navController = navHostFragment.navController
+
+        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.navbar)
+        bottomNavigationView.setupWithNavController(navController)
     }
 
     private fun checkPermissions() {
