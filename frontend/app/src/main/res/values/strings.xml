@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">frontend</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="app_name">Galeria</string>
+    <string name="permission_not_granted">Você recusou a permissão, para continuar utilizando a galeria, permita o acesso.</string>
+    <string name="try_permission_again">Tentar novamente</string>
 </resources>
