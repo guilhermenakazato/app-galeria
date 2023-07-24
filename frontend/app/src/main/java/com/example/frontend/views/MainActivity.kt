@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.view.View
 import android.provider.MediaStore
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -15,13 +14,13 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.example.frontend.R
+import com.example.frontend.components.PermissionDialogFragment
 import com.example.frontend.model.Image
 import com.example.frontend.model.Video
 import com.example.frontend.utils.containsOnly
 import com.example.frontend.utils.isPermissionGranted
 import com.example.frontend.utils.requestPermission
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsResultCallback {
     private lateinit var navController: NavController
@@ -168,20 +167,12 @@ class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsRes
         permissions: Array<String>,
         grantResults: IntArray
     ) {
-        val mainLayout: View = findViewById(R.id.mainLayout)
-
         if (requestCode == REQUEST_STORAGE) {
             if (grantResults.containsOnly(PackageManager.PERMISSION_GRANTED)) {
                 val mediaQuantity = getVideosQuantity() + getImagesQuantity()
                 Log.i("quantidade", mediaQuantity.toString())
             } else {
-                Snackbar.make(
-                    mainLayout,
-                    R.string.permission_not_granted,
-                    Snackbar.LENGTH_INDEFINITE
-                ).setAction(R.string.try_permission_again) {
-                    checkAndRequestPermissions()
-                }.show()
+                PermissionDialogFragment(::checkAndRequestPermissions).show(supportFragmentManager, "hi")
             }
         } else {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults)
