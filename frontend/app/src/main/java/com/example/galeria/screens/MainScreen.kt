@@ -1,31 +1,30 @@
 package com.example.galeria.screens
 
 import android.Manifest
-import android.app.Activity
 import android.content.ContentUris
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -33,7 +32,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -47,11 +45,9 @@ import com.example.galeria.components.PermissionDialog
 import com.example.galeria.ui.theme.GradientOne
 import com.example.galeria.ui.theme.GradientTwo
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
-import java.security.Permission
 
 sealed class Screen(val route: String, @DrawableRes val icon: Int) {
     object Photo: Screen("photo", R.drawable.ic_photo)
@@ -93,9 +89,39 @@ fun MainScreen() {
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentDestination = navBackStackEntry?.destination
             items.forEach { screen ->
+                val selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
+
+                val animatedBgColor by animateColorAsState(
+                    if (selected) Color.White else colorResource(id = R.color.backgroundColor),
+                    label = "bgColor",
+                    animationSpec = tween(
+                        250, easing = LinearEasing
+                    )
+                )
+
+                val animatedColor by animateColorAsState(
+                    if (selected) colorResource(id = R.color.backgroundColor) else Color.White,
+                    label = "color",
+                    animationSpec = tween(
+                        250, easing = LinearEasing
+                    )
+                )
+
                 BottomNavigationItem(
-                    icon = { Icon(painterResource(screen.icon), contentDescription = null) },
-                    selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
+                    icon =
+                    {
+                        Icon(
+                            painterResource(screen.icon),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .drawBehind {
+                                    drawRoundRect(animatedBgColor, cornerRadius = CornerRadius(30f, 30f))
+                                }
+                                .padding(8.dp),
+                            tint = animatedColor
+                        )
+                    },
+                    selected = selected,
                     onClick = {
                         navController.navigate(screen.route) {
                             popUpTo(navController.graph.findStartDestination().id) {
@@ -132,7 +158,13 @@ fun checkAndRequestPermission() {
 
         if(readMediaPermissionState.status.shouldShowRationale) {
             if(openDialog.value) {
-                showDialog(confirmed, "Configurações")
+                PermissionDialog(
+                    onDismissRequest = {  },
+                    onConfirm = { confirmed.value = true },
+                    description = "Você recusou a permissão, para continuar utilizando a Galeria permita o acesso.",
+                    buttonText = "Configurações",
+                    icon = R.drawable.ic_alert
+                )
             }
 
             if(confirmed.value) {
@@ -146,18 +178,6 @@ fun checkAndRequestPermission() {
         }
     }
 }
-
-@Composable
-fun showDialog(confirmed: MutableState<Boolean>, buttonText: String) {
-    PermissionDialog(
-        onDismissRequest = {  },
-        onConfirm = { confirmed.value = true },
-        description = "Você recusou a permissão, para continuar utilizando a Galeria permita o acesso.",
-        buttonText = buttonText,
-        icon = R.drawable.ic_alert
-    )
-}
-
 
 @Composable
 fun openAppSettings() {
