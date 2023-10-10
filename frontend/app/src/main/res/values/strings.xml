@@ -1,8 +1,3 @@
 <resources>
     <string name="app_name">Galeria</string>
-    <string name="permission_not_granted">
-        Você recusou a permissão, para continuar
-        utilizando a galeria, permita o acesso.
-    </string>
-    <string name="try_permission_again">Tentar novamente</string>
 </resources>
