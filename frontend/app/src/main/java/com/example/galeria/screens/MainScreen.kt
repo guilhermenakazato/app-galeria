@@ -16,6 +16,7 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
@@ -24,10 +25,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -84,7 +88,7 @@ fun MainScreen() {
                         end = Offset(size.width, 0f),
                         strokeWidth = borderSize
                     )
-                }
+                },
         ) {
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentDestination = navBackStackEntry?.destination
@@ -115,7 +119,10 @@ fun MainScreen() {
                             contentDescription = null,
                             modifier = Modifier
                                 .drawBehind {
-                                    drawRoundRect(animatedBgColor, cornerRadius = CornerRadius(30f, 30f))
+                                    drawRoundRect(
+                                        animatedBgColor,
+                                        cornerRadius = CornerRadius(30f, 30f)
+                                    )
                                 }
                                 .padding(8.dp),
                             tint = animatedColor

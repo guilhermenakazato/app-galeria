@@ -6,6 +6,8 @@ val Black = Color(0xFF0F0F0F)
 val GradientOne = Color(0xFF191919)
 val GradientTwo = Color(0xFFFFFFFF)
 val AlertButtonBorder = Color(0xFF5B5B5B)
+val BgGradientOne = Color(0xFF0F0F0F)
+val BgGradientTwo = Color(0xFF2F2F2F)
 
 val Purple80 = Color(0xFFD0BCFF)
 val PurpleGrey80 = Color(0xFFCCC2DC)
