@@ -16,22 +16,15 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -45,13 +38,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.frontend.model.Image
 import com.example.frontend.model.Video
 import com.example.galeria.R
-import com.example.galeria.components.PermissionDialog
 import com.example.galeria.ui.theme.GradientOne
 import com.example.galeria.ui.theme.GradientTwo
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
-import com.google.accompanist.permissions.shouldShowRationale
+import com.example.galeria.utils.Permissions
 
 sealed class Screen(val route: String, @DrawableRes val icon: Int) {
     object Photo: Screen("photo", R.drawable.ic_photo)
@@ -151,37 +140,18 @@ fun MainScreen() {
         }
     }
 }
-
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun checkAndRequestPermission() {
-    val readMediaPermissionState = rememberPermissionState(permission = Manifest.permission.READ_EXTERNAL_STORAGE)
-
-    if (readMediaPermissionState.status.isGranted) {
-        getMediaQuantity()
+    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        Permissions.multiplePermissions(permissions = listOf(
+            Manifest.permission.READ_MEDIA_VIDEO,
+            Manifest.permission.READ_MEDIA_IMAGES
+        )) {
+            getMediaQuantity()
+        }
     } else {
-        val confirmed = remember { mutableStateOf(false) }
-        val openDialog = remember { mutableStateOf(true) }
-
-        if(readMediaPermissionState.status.shouldShowRationale) {
-            if(openDialog.value) {
-                PermissionDialog(
-                    onDismissRequest = {  },
-                    onConfirm = { confirmed.value = true },
-                    description = "Você recusou a permissão, para continuar utilizando a Galeria permita o acesso.",
-                    buttonText = "Configurações",
-                    icon = R.drawable.ic_alert
-                )
-            }
-
-            if(confirmed.value) {
-                openAppSettings()
-                confirmed.value = false
-            }
-        } else {
-            SideEffect {
-                readMediaPermissionState.launchPermissionRequest()
-            }
+        Permissions.singlePermission(permission = Manifest.permission.READ_EXTERNAL_STORAGE) {
+            getMediaQuantity()
         }
     }
 }
