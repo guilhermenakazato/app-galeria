@@ -13,6 +13,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.frontend.model.Video
 import com.example.galeria.R
 import com.example.galeria.ui.theme.BgGradientOne
 import com.example.galeria.ui.theme.BgGradientTwo

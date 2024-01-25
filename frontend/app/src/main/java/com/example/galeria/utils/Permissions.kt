@@ -17,13 +17,11 @@ class Permissions {
     companion object {
         @OptIn(ExperimentalPermissionsApi::class)
         @Composable
-        fun singlePermission(permission: String, getMediaQuantity: @Composable () -> Unit) {
+        fun singlePermission(permission: String) {
             val readMediaPermissionState = rememberPermissionState(permission = permission)
             val shouldShowRationale = readMediaPermissionState.status.shouldShowRationale
 
-            if (readMediaPermissionState.status.isGranted) {
-                getMediaQuantity()
-            } else {
+            if (!readMediaPermissionState.status.isGranted) {
                 showPermissionDialog(shouldShowRationale) {
                     readMediaPermissionState.launchPermissionRequest()
                 }
@@ -32,13 +30,11 @@ class Permissions {
 
         @OptIn(ExperimentalPermissionsApi::class)
         @Composable
-        fun multiplePermissions(permissions: List<String>, getMediaQuantity: @Composable () -> Unit) {
+        fun multiplePermissions(permissions: List<String>) {
             val readMediaPermissionsState = rememberMultiplePermissionsState(permissions = permissions)
             val shouldShowRationale = readMediaPermissionsState.shouldShowRationale
 
-            if (readMediaPermissionsState.allPermissionsGranted) {
-                getMediaQuantity()
-            } else {
+            if (!readMediaPermissionsState.allPermissionsGranted) {
                 showPermissionDialog(shouldShowRationale) {
                     readMediaPermissionsState.launchMultiplePermissionRequest()
                 }

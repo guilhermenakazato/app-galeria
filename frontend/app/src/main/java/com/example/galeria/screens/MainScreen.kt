@@ -1,16 +1,10 @@
 package com.example.galeria.screens
 
 import android.Manifest
-import android.content.ContentUris
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import android.provider.MediaStore
 import android.provider.Settings
-import android.util.Log
-import androidx.annotation.DrawableRes
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -31,31 +25,19 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.frontend.model.Image
-import com.example.frontend.model.Video
 import com.example.galeria.R
+import com.example.galeria.navigation.RootNavGraph
 import com.example.galeria.ui.theme.GradientOne
 import com.example.galeria.ui.theme.GradientTwo
 import com.example.galeria.utils.Permissions
 
-sealed class Screen(val route: String, @DrawableRes val icon: Int) {
-    object Photo: Screen("photo", R.drawable.ic_photo)
-    object Video: Screen("video", R.drawable.ic_video)
-    object CreateFolder: Screen("create_folder", R.drawable.ic_create_folder)
-    object Search: Screen("search", R.drawable.ic_search)
-    object Library: Screen("library", R.drawable.ic_library)
-}
-
-val items = listOf(
-    Screen.Photo,
-    Screen.Video,
-    Screen.CreateFolder,
-    Screen.Search,
-    Screen.Library
+val mainScreens = listOf(
+    Screen.PhotoSection,
+    Screen.VideoSection,
+    Screen.CreateFolderSection,
+    Screen.LibrarySection
 );
 
 @Composable
@@ -81,7 +63,7 @@ fun MainScreen() {
         ) {
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentDestination = navBackStackEntry?.destination
-            items.forEach { screen ->
+            mainScreens.forEach { screen ->
                 val selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
 
                 val animatedBgColor by animateColorAsState(
@@ -131,28 +113,18 @@ fun MainScreen() {
             }
         }
     }) { innerPadding ->
-        NavHost(navController = navController, enterTransition = {EnterTransition.None}, exitTransition = { ExitTransition.None }, startDestination = "photo", modifier = Modifier.padding(innerPadding)) {
-            composable("photo") {PhotoScreen()}
-            composable("video") {VideoScreen()}
-            composable("create_folder") {CreateFolderScreen()}
-            composable("search") {SearchScreen()}
-            composable("library") {LibraryScreen()}
-        }
+        RootNavGraph(navController, innerPadding)
     }
 }
 @Composable
 fun checkAndRequestPermission() {
     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         Permissions.multiplePermissions(permissions = listOf(
-            Manifest.permission.READ_MEDIA_VIDEO,
-            Manifest.permission.READ_MEDIA_IMAGES
-        )) {
-            getMediaQuantity()
-        }
+            Manifest.permission.READ_MEDIA_IMAGES,
+            Manifest.permission.READ_MEDIA_VIDEO
+        ))
     } else {
-        Permissions.singlePermission(permission = Manifest.permission.READ_EXTERNAL_STORAGE) {
-            getMediaQuantity()
-        }
+        Permissions.singlePermission(permission = Manifest.permission.READ_EXTERNAL_STORAGE)
     }
 }
 
@@ -163,122 +135,4 @@ fun openAppSettings() {
     val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
     intent.data = Uri.fromParts("package", context.packageName, null)
     context.startActivity(intent)
-}
-
-@Composable
-fun getMediaQuantity() {
-    val mediaQuantity = getVideosQuantity() + getImagesQuantity()
-    Log.i("heyo", mediaQuantity.toString())
-}
-
-@Composable
-fun getVideosQuantity() : Int {
-    val videoList = mutableListOf<Video>()
-
-    val collection =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            MediaStore.Video.Media.getContentUri(
-                MediaStore.VOLUME_EXTERNAL
-            )
-        } else {
-            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-        }
-
-    val projection = arrayOf(
-        MediaStore.Video.Media._ID,
-        MediaStore.Video.Media.DISPLAY_NAME,
-        MediaStore.Video.Media.DURATION,
-        MediaStore.Video.Media.SIZE
-    )
-
-    val sortOrder = "${MediaStore.Video.Media.DISPLAY_NAME} ASC"
-
-    val context = LocalContext.current
-    val query = context.contentResolver.query(
-        collection,
-        projection,
-        null,
-        null,
-        sortOrder
-    )
-    query?.use { cursor ->
-        val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
-        val nameColumn =
-            cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME)
-        val durationColumn =
-            cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
-        val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE)
-
-        while (cursor.moveToNext()) {
-            val id = cursor.getLong(idColumn)
-            val name = cursor.getString(nameColumn)
-            val duration = cursor.getInt(durationColumn)
-            val size = cursor.getInt(sizeColumn)
-
-            val contentUri: Uri = ContentUris.withAppendedId(
-                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                id
-            )
-
-            videoList += Video(contentUri, name, size, duration)
-        }
-
-        cursor.close()
-    }
-
-    return videoList.size
-}
-
-@Composable
-fun getImagesQuantity() : Int {
-    val imageList = mutableListOf<Image>()
-
-    val collection =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            MediaStore.Images.Media.getContentUri(
-                MediaStore.VOLUME_EXTERNAL
-            )
-        } else {
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-        }
-
-    val projection = arrayOf(
-        MediaStore.Images.Media._ID,
-        MediaStore.Images.Media.DISPLAY_NAME,
-        MediaStore.Images.Media.SIZE
-    )
-
-    val sortOrder = "${MediaStore.Images.Media.DISPLAY_NAME} ASC"
-    val context = LocalContext.current
-
-    val query = context.contentResolver.query(
-        collection,
-        projection,
-        null,
-        null,
-        sortOrder
-    )
-    query?.use { cursor ->
-        val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
-        val nameColumn =
-            cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
-        val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)
-
-        while (cursor.moveToNext()) {
-            val id = cursor.getLong(idColumn)
-            val name = cursor.getString(nameColumn)
-            val size = cursor.getInt(sizeColumn)
-
-            val contentUri: Uri = ContentUris.withAppendedId(
-                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                id
-            )
-
-            imageList += Image(contentUri, name, size)
-        }
-
-        cursor.close()
-    }
-
-    return imageList.size
 }
