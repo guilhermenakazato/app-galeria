@@ -5,17 +5,13 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import android.util.Log
-import androidx.compose.runtime.Composable
 import com.example.frontend.model.Image
 import com.example.galeria.utils.Date
 
 class ImageController {
     companion object {
-        @Composable
-        fun getImages(context: Context): MutableMap<Long, Image> {
+        fun getImages(context: Context): Pair<Int, MutableMap<Long, Image>> {
             val imageMap = mutableMapOf<Long, Image>()
-            var byteSize: Long = 0
 
             val collection =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -48,6 +44,7 @@ class ImageController {
                     cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
                 val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)
                 val dateColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED)
+                var counter = 0
 
                 while (cursor.moveToNext()) {
                     val id = cursor.getLong(idColumn)
@@ -60,14 +57,15 @@ class ImageController {
                         id
                     )
 
-                    byteSize += size
-                    imageMap[id] = Image(id, contentUri, name, size, date)
+                    imageMap[id] = Image(counter.toLong(), id, contentUri, name, size, date)
+                    counter++
                 }
 
                 cursor.close()
             }
 
-            return imageMap
+            val hashCode = imageMap.hashCode()
+            return Pair(hashCode, imageMap)
         }
     }
 }

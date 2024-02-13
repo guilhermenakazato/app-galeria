@@ -46,6 +46,7 @@ class VideoController {
                     cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
                 val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE)
                 val dateColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED)
+                var counter = 0
 
                 while (cursor.moveToNext()) {
                     val id = cursor.getLong(idColumn)
@@ -59,7 +60,8 @@ class VideoController {
                         id
                     )
 
-                    videoList[id] = Video(id, contentUri, name, size, duration, date)
+                    videoList[id] = Video(counter.toLong(), id, contentUri, name, size, duration, date)
+                    counter++
                 }
 
                 cursor.close()

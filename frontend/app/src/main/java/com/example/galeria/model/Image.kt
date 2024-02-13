@@ -3,8 +3,10 @@ package com.example.frontend.model
 import android.net.Uri
 import com.example.galeria.utils.Date
 
-class Image(imageId: Long, imageUri: Uri, imageName: String, imageSize: Int, imageDate: Date) : Media() {
-    override var id: Long = imageId
+class Image(orderedId: Long, imageId: Long, imageUri: Uri, imageName: String, imageSize: Int, imageDate: Date) : Media() {
+    override var secondaryId: Long = orderedId
+        set(value) {}
+    override var primaryId: Long = imageId
         set(value) {}
     override var name: String = imageName
         set(value) {}

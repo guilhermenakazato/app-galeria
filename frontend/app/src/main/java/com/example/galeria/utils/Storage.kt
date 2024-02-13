@@ -1,38 +1,38 @@
 package com.example.galeria.utils
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
 class Storage {
     companion object {
-        val HASH = longPreferencesKey("hash")
+        suspend fun saveHash(newHash: Int, context: Context, mediaType: String) {
+            val hashKey = intPreferencesKey(mediaType + "_hash")
 
-        suspend fun saveHash(newHash: Long, context: Context) {
             context.dataStore.edit { settings ->
-                settings[HASH] = newHash
+                settings[hashKey] = newHash
             }
         }
 
-        suspend fun retrieveHash(context: Context): Long {
-            val hashFlow: Flow<Long> = context.dataStore.data
+        suspend fun retrieveHash(context: Context, mediaType: MediaType): Int {
+            val hashKey = intPreferencesKey(mediaType.name + "_hash")
+            val hashFlow: Flow<Int> = context.dataStore.data
                 .map { preferences ->
-                    preferences[HASH] ?: -1
-                }
+                    preferences[hashKey] ?: 0
+                }.cancellable()
 
-            var hash: Long = -1
-            hashFlow.collect {
-                hash = it
-            }
-
-            return hash
+            return hashFlow.first()
         }
 
         // TODO: enum

@@ -1,4 +1,4 @@
-package com.example.galeria.screens
+package com.example.galeria.screens.maincontent
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

@@ -1,4 +1,4 @@
-package com.example.galeria.screens
+package com.example.galeria.screens.maincontent
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -18,7 +17,7 @@ import com.example.galeria.ui.theme.BgGradientOne
 import com.example.galeria.ui.theme.BgGradientTwo
 
 @Composable
-fun LibraryScreen() {
+fun VideoScreen() {
     val colorStops = arrayOf(
         0.9f to BgGradientOne,
         1f to BgGradientTwo,
@@ -33,6 +32,5 @@ fun LibraryScreen() {
         horizontalAlignment = Alignment.CenterHorizontally,
     ){
         Image(painter = painterResource(R.drawable.logo), contentDescription = "Logo", modifier = Modifier.padding(vertical = 10.dp))
-        Text("Biblioteca", fontSize = 30.sp, color = colorResource(R.color.textColor))
-    }
+        Text("Vídeos", fontSize = 30.sp, color = colorResource(R.color.textColor)) }
 }

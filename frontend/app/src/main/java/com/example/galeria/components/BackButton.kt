@@ -17,7 +17,7 @@ import com.example.galeria.R
 import com.example.galeria.ui.theme.Black
 
 @Composable
-fun BackButton(onClick: () -> Unit, modifier: Modifier) {
+fun BackButton(modifier: Modifier, onClick: () -> Unit) {
     IconButton(
         modifier = modifier
             .border(
